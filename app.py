@@ -326,3 +326,75 @@ if os.path.exists(file_name):
 
 else:
     st.info("No employee records available yet.")
+# =====================================
+# BEST EMPLOYEE RECOMMENDATION
+# =====================================
+
+st.subheader("🏆 Best Employee Recommendation")
+
+# Check whether employee records are available
+if os.path.exists(file_name):
+
+    records = pd.read_csv(file_name)
+
+    required_columns = [
+        "Employee_ID",
+        "Attendance",
+        "Productivity",
+        "Task_Completion"
+    ]
+
+    if all(col in records.columns for col in required_columns):
+
+        # Calculate weighted performance score
+        records["Recommendation_Score"] = (
+            records["Productivity"] * 0.35 +
+            records["Task_Completion"] * 0.30 +
+            records["Attendance"] * 0.15 +
+            records["Average_Score"] * 0.20
+        )
+
+        ranked_employees = records.sort_values(
+            by="Recommendation_Score",
+            ascending=False
+        ).reset_index(drop=True)
+
+        ranked_employees.index = ranked_employees.index + 1
+        ranked_employees.index.name = "Rank"
+
+        st.write("### Top 5 Recommended Employees")
+
+        st.dataframe(
+            ranked_employees[
+                ["Employee_ID", "Attendance",
+                 "Productivity", "Task_Completion",
+                 "Recommendation_Score"]
+            ].head(5),
+            use_container_width=True
+        )
+
+        # Display the top employee
+        best_employee = ranked_employees.iloc[0]
+
+        st.success(
+            f"🏆 Top performer: Employee "
+            f"{best_employee['Employee_ID']}"
+        )
+        st.write("Testing Best Employee Recommendation Section")
+
+        st.write(
+            f"Recommendation Score: "
+            f"{best_employee['Recommendation_Score']:.2f}"
+        )
+
+        st.info(
+            "This employee is recommended for award consideration "
+            "based on the available performance indicators. "
+            "Final decisions should be reviewed by management."
+        )
+
+    else:
+        st.warning("Required employee performance columns are missing.")
+
+else:
+    st.info("No employee records available yet.")
